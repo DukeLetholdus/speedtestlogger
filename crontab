@@ -1,0 +1,2 @@
+*/5 * * * * /usr/local/bin/python3 /app/speedtestlogger.py > /logs2/pythonlog
+# empty line
