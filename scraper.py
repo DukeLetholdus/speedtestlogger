@@ -74,3 +74,14 @@ with open("./logs/output.txt", "a") as text_file:
     print("Downtime in hot hours is: {downtime}%".format(downtime=downtime), file=text_file)
     print("slow measurements in hot hours: {slow} times".format(slow=slow), file=text_file)
     print("all measurements in hot hours: {fast} times".format(fast=slow+fast), file=text_file)
+
+# calculate percentage internet no connection
+slow = 0
+fast = 0
+for i in range(len(loglist)):
+    ds = int(loglist[i][3])
+    if ds == 0: slow += 1
+    else: fast += 1
+downtime = round(slow/(slow + fast)*100, 1)
+with open("./logs/output.txt", "a") as text_file:
+    print("Percentage no connection is: {downtime}%".format(downtime=downtime), file=text_file)
