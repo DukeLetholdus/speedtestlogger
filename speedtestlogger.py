@@ -15,9 +15,12 @@ def test_internet_speed():
         up += round(st.upload() / 1000000)  # Perform the upload speed test and convert to Mbps
     except speedtest.SpeedtestException as e:
         time.sleep(wait)
-        st = speedtest.Speedtest(secure=1)
-        down += round(st.download() / 1000000)  # Perform the download speed test and convert to Mbps
-        up += round(st.upload() / 1000000)  # Perform the upload speed test and convert to Mbps
+        try:
+            st = speedtest.Speedtest(secure=1)
+            down += round(st.download() / 1000000)  # Perform the download speed test and convert to Mbps
+            up += round(st.upload() / 1000000)  # Perform the upload speed test and convert to Mbps
+        except:
+             down = up = 0
     return down, up
 
 # Set variables
