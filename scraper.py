@@ -1,8 +1,11 @@
 import csv
 import datetime
 
+inputfile = "logs/internetspeed.csv"
+outputfile = "logs/output1-2.txt"
+
 # read data from log file
-with open('./logs/internetspeed.csv') as f:
+with open(inputfile) as f:
     reader = csv.reader(f)
     loglist = list(reader)
 
@@ -21,7 +24,7 @@ total = 0
 for i in range(len(loglist)):
     total += int(loglist[i][3])
     counter += 1
-with open("./logs/output.txt", "w") as text_file:
+with open(outputfile, "w") as text_file:
     print("Total measurements: {counter}".format(counter=counter), file=text_file)
     print("Average download: {average} mbps".format(average=round(total/counter, 1)), file=text_file)
 
@@ -34,7 +37,7 @@ for i in range(len(loglist)):
     if (mtime > time4 and mtime < time1) or (mtime > time2 and mtime < time3):
         total += int(loglist[i][3])
         counter += 1
-with open("./logs/output.txt", "a") as text_file:
+with open(outputfile, "a") as text_file:
     print("Average download low hours: {average} mbps".format(average=round(total/counter, 1)), file=text_file)
 
 # average download hot hours
@@ -46,7 +49,7 @@ for i in range(len(loglist)):
     if (mtime > time1 and mtime < time2) or (mtime > time3 and mtime < time4):
         total += int(loglist[i][3])
         counter += 1
-with open("./logs/output.txt", "a") as text_file:
+with open(outputfile, "a") as text_file:
     print("Average download hot hours: {average} mbps".format(average=round(total/counter, 1)), file=text_file)
 
 # calculate percentage internet bad
@@ -57,7 +60,7 @@ for i in range(len(loglist)):
     if ds < threshold: slow += 1
     else: fast += 1
 downtime = round(slow/(slow + fast)*100, 1)
-with open("./logs/output.txt", "a") as text_file:
+with open(outputfile, "a") as text_file:
     print("Downtime is: {downtime}%".format(downtime=downtime), file=text_file)
 
 # calculate quality in hot hours
@@ -70,10 +73,40 @@ for i in range(len(loglist)):
         if ds < threshold: slow += 1
         else: fast += 1
 downtime = round(slow/(slow + fast)*100, 1)
-with open("./logs/output.txt", "a") as text_file:
+with open(outputfile, "a") as text_file:
     print("Downtime in hot hours is: {downtime}%".format(downtime=downtime), file=text_file)
     print("slow measurements in hot hours: {slow} times".format(slow=slow), file=text_file)
     print("all measurements in hot hours: {fast} times".format(fast=slow+fast), file=text_file)
+
+# Calculate length of low speed
+listLength = []
+outageLengt = 0
+outagePrev = False
+
+for i in range(len(loglist)):
+    ds = int(loglist[i][3])
+    if ds < threshold and outagePrev == False:
+        outageLengt += 1
+        outagePrev = True
+    elif ds < threshold and outagePrev == True:
+        outageLengt += 1
+    elif ds >= threshold and outagePrev == True:
+        outagePrev = False
+        listLength.append(outageLengt * 5)
+        outageLengt = 0
+
+print(listLength)
+
+outagemax = max(listLength)
+outageavg = round(sum(listLength) / len(listLength), 1)
+outagenum = len(listLength)
+outagetot = sum(listLength)
+
+with open(outputfile, "a") as text_file:
+    print("Number of slowtimes: {x}".format(x=outagenum), file=text_file)
+    print("Combined length of slowtimes: {x} minutes".format(x=outagetot), file=text_file)
+    print("Average slowtime: {x} minutes".format(x=outageavg), file=text_file)
+    print("Longest slowtime: {x} minutes".format(x=outagemax), file=text_file)
 
 # calculate percentage internet no connection
 slow = 0
@@ -83,5 +116,35 @@ for i in range(len(loglist)):
     if ds == 0: slow += 1
     else: fast += 1
 downtime = round(slow/(slow + fast)*100, 1)
-with open("./logs/output.txt", "a") as text_file:
+with open(outputfile, "a") as text_file:
     print("Percentage no connection is: {downtime}%".format(downtime=downtime), file=text_file)
+
+# Calculate length of outages
+listLength = []
+outageLengt = 0
+outagePrev = False
+
+for i in range(len(loglist)):
+    ds = int(loglist[i][3])
+    if ds == 0 and outagePrev == False:
+        outageLengt += 1
+        outagePrev = True
+    elif ds == 0 and outagePrev == True:
+        outageLengt += 1
+    elif ds != 0 and outagePrev == True:
+        outagePrev = False
+        listLength.append(outageLengt * 5)
+        outageLengt = 0
+
+print(listLength)
+
+outagemax = max(listLength)
+outageavg = round(sum(listLength) / len(listLength), 1)
+outagenum = len(listLength)
+outagetot = sum(listLength)
+
+with open(outputfile, "a") as text_file:
+    print("Number of outages: {x}".format(x=outagenum), file=text_file)
+    print("Combined outages length: {x} minutes".format(x=outagetot), file=text_file)
+    print("Average downtime is: {x} minutes".format(x=outageavg), file=text_file)
+    print("Longest downtime is: {x} minutes".format(x=outagemax), file=text_file)
